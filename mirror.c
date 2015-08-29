@@ -215,13 +215,14 @@ int getLuma(x, y, w, h)
 
 int initCalled = 0;
 int windowWidth, windowHeight;
+unsigned char *buf;
 
 
-void myrect(unsigned char* pBuffer, int x, int y, int w, int h, int luma)
+void myrect(int x, int y, int w, int h, int luma)
 {
 	uint32_t color = hsv2rgb(1.0f * (rand()%360), 1.0, (float)(luma / 255.0));
 
-	unsigned char *pScanline = &pBuffer[y*windowWidth*4 + x*4];
+	unsigned char *pScanline = &buf[y*windowWidth*4 + x*4];
 	while (h-- > 0)
 	{
 		int xwalk;
@@ -237,7 +238,22 @@ void myrect(unsigned char* pBuffer, int x, int y, int w, int h, int luma)
 	}
 }
 
-unsigned char *buf;
+
+typedef void (*pixelPainter)(int x, int y, int w, int h, int cx, int cy, int rx, int ry);
+
+void PaintLumaOnStaticHues(int x, int y, int w, int h, int cx, int cy, int rx, int ry, luma)
+{
+ 
+    myrect(cx-rx, cy-ry, rx*2, ry*2, luma);
+}
+
+pixelPainter painters[] = {
+    PaintLumaOnStaticHues
+
+
+};
+
+
 
 void processMirrorFrame(uint8_t *pFrame, int width, int height)
 {
@@ -275,15 +291,14 @@ void processMirrorFrame(uint8_t *pFrame, int width, int height)
   srand(822);
 
   Start(windowWidth, windowHeight);
-  Background(60,0,20);
-	Fill(222,222,0,1);
   int walk;
 
-memset(buf, 0, windowWidth*windowHeight*4);
+  // Clear frame to black
+  memset(buf, 0, windowWidth*windowHeight*4);
 
   int x,y; 
-  int yCells = 36;
-  int xCells = 64;
+  int yCells = 34;
+  int xCells = 24;
   int cellWidth = width/xCells;
   int cellHeight = height/yCells;
   int windowCellWidth = windowWidth / xCells;
